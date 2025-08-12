@@ -1,4 +1,5 @@
 import re
+
 from src.Vacancy import Vacancy
 
 

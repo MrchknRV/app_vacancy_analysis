@@ -1,16 +1,18 @@
-from src.BaseClasses import BaseDBManager
-
 import psycopg2
 from psycopg2.extensions import connection as PG_conn
 
+from src.BaseClasses import BaseDBManager
 from src.Vacancy import Vacancy
 
 
 class DBManager(BaseDBManager):
     """Класс работы с БД PostgreSQL"""
+
     __slots__ = "conn", "dbname", "password", "user", "host", "port"
 
-    def __init__(self, dbname: str, password: str, user: str = "postgres", host: str = "localhost", port: str = "5432"):
+    def __init__(
+        self, dbname: str, password: str, user: str = "postgres", host: str = "localhost", port: str = "5432"
+    ):
         self.conn: PG_conn
         self.dbname = dbname
         self.password = password

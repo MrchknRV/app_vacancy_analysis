@@ -14,15 +14,15 @@ class Vacancy(BaseVacancy):
     requirement: str
 
     def __init__(
-            self,
-            id_vacancy: str,
-            name: str,
-            company_id: int,
-            company_name: str,
-            url: str,
-            salary_from: float,
-            salary_to: float,
-            requirement: str,
+        self,
+        id_vacancy: str,
+        name: str,
+        company_id: int,
+        company_name: str,
+        url: str,
+        salary_from: float,
+        salary_to: float,
+        requirement: str,
     ):
         self.id_vacancy = self.__validate_id_vacancy(id_vacancy)
         self.company_id = self.__validate_company_id(company_id)

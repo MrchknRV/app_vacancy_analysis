@@ -5,14 +5,8 @@ from dotenv import load_dotenv
 from src.DBManager import DBManager
 from src.FileHandlerJob import FileHandlerJob
 from src.HH import HH
+from src.utils import filter_vacancies, get_top_vacancies, get_vacancies_by_salary, print_vacancies, sort_vacancies
 from src.Vacancy import Vacancy
-from src.utils import (
-    filter_vacancies,
-    get_top_vacancies,
-    get_vacancies_by_salary,
-    print_vacancies,
-    sort_vacancies,
-)
 
 load_dotenv()
 
