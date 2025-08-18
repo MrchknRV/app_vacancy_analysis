@@ -1,61 +1,77 @@
-import os
-
-from dotenv import load_dotenv
-
+from src.DBCreator import DBCreator
 from src.DBManager import DBManager
-from src.FileHandlerJob import FileHandlerJob
-from src.HH import HH
-from src.utils import filter_vacancies, get_top_vacancies, get_vacancies_by_salary, print_vacancies, sort_vacancies
-from src.Vacancy import Vacancy
-
-load_dotenv()
-
-hh_api = HH()
-
-DB_NAME = os.getenv("DATABASE_NAME") or ""
-DB_PASSWORD = os.getenv("DATABASE_PASSWORD") or ""
-DB_USER = os.getenv("DATABASE_USER") or ""
-DB_HOST = os.getenv("DATABASE_HOST") or ""
-DB_PORT = os.getenv("DATABASE_PORT") or ""
-db_manager = DBManager(DB_NAME, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT)
-
-file_handler = FileHandlerJob()
-db_manager.create_database()
-db_manager.connect()
-db_manager.create_table()
-
-count_vacancies = db_manager.get_companies_and_vacancies_count()
-get_all_vacancies = db_manager.get_all_vacancies()
-get_avg_salary = db_manager.get_avg_salary()
-get_vacancies_with_higher_salary = db_manager.get_vacancies_with_higher_salary()
-get_vacancies_with_keyword = db_manager.get_vacancies_with_keyword("python")
-print(count_vacancies)
-print(get_all_vacancies)
-print(get_avg_salary)
-print(get_vacancies_with_higher_salary)
-print(get_vacancies_with_keyword)
+from src.HH import HeadHunterAPI
+from config import EMPLOYER_IDS
 
 
 def main():
-    search_query = input("Введите поисковый запрос: ")
-    top_n = int(input("Введите количество вакансий для вывода в топ N: "))
-    filter_words = input("Введите ключевые слова для фильтрации вакансий: ").split()
-    salary_range = input("Введите диапазон зарплат: ")
+    db_creator = DBCreator()
+    db_creator.create_database()
+    db_creator.create_tables()
+    hh_api = HeadHunterAPI()
+    db_manager = DBManager()
 
-    hh_vacancies = hh_api.load_vacancies(search_query)
-    vacancies_list = Vacancy.create_vacancies(hh_vacancies)
-    db_manager.insert_vacancies(vacancies_list)
-    file_handler.add_vacancy(vacancies_list)
+    print("Получение данных о компаниях...")
+    employers = hh_api.get_employers(EMPLOYER_IDS)
+    db_manager.insert_employers(employers)
 
-    file_handler.delete_vacancy(vacancies_list[0])
-    db_manager.delete_vacancy(vacancies_list[0])
-    filtered_vacancies = filter_vacancies(vacancies_list, filter_words)
+    print("Получение данных о вакансиях...")
+    for employer_id in EMPLOYER_IDS:
+        vacancies = hh_api.get_vacancies(employer_id)
+        db_manager.insert_vacancies(vacancies)
 
-    ranged_vacancies = get_vacancies_by_salary(filtered_vacancies, salary_range)
+    print("Данные успешно загружены в базу данных")
 
-    sorted_vacancies = sort_vacancies(ranged_vacancies)
-    top_vacancies = get_top_vacancies(sorted_vacancies, top_n)
-    print_vacancies(top_vacancies)
+
+    while True:
+        print("\nВыберите действие:")
+        print("1. Список компаний и количество вакансий")
+        print("2. Список всех вакансий")
+        print("3. Средняя зарплата по вакансиям")
+        print("4. Вакансии с зарплатой выше средней")
+        print("5. Поиск вакансий по ключевому слову")
+        print("0. Выход")
+
+        choice = input("> ")
+
+        if choice == "1":
+            companies = db_manager.get_companies_and_vacancies_count()
+            for company in companies:
+                print(f"{company['company']}: {company['vacancies_count']} вакансий")
+
+        elif choice == "2":
+            vacancies = db_manager.get_all_vacancies()
+            for vacancy in vacancies:
+                print(f"{vacancy['company']} - {vacancy['title']}")
+                print(f"Зарплата: {vacancy['salary']}")
+                print(f"Ссылка: {vacancy['url']}\n")
+
+        elif choice == "3":
+            avg_salary = db_manager.get_avg_salary()
+            print(f"Средняя зарплата: {avg_salary}")
+
+        elif choice == "4":
+            vacancies = db_manager.get_vacancies_with_higher_salary()
+            print(f"Найдено {len(vacancies)} вакансий с зарплатой выше средней:")
+            for vacancy in vacancies:
+                print(f"{vacancy['company']} - {vacancy['title']}")
+                print(f"Зарплата: {vacancy['salary']}")
+                print(f"Ссылка: {vacancy['url']}\n")
+
+        elif choice == "5":
+            keyword = input("Введите ключевое слово для поиска: ")
+            vacancies = db_manager.get_vacancies_with_keyword(keyword)
+            print(f"Найдено {len(vacancies)} вакансий по запросу '{keyword}':")
+            for vacancy in vacancies:
+                print(f"{vacancy['company']} - {vacancy['title']}")
+                print(f"Зарплата: {vacancy['salary']}")
+                print(f"Ссылка: {vacancy['url']}\n")
+
+        elif choice == "0":
+            break
+
+        else:
+            print("Неверный ввод. Попробуйте снова.")
 
 
 if __name__ == "__main__":
