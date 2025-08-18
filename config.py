@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,15 +13,4 @@ DB_PORT = os.getenv("DATABASE_PORT")
 
 PATH = Path(__file__).parent
 
-EMPLOYER_IDS = [
-    1740,
-    3529,
-    78638,
-    2748,
-    3776,
-    41862,
-    67611,
-    87021,
-    2180,
-    84585
-]
+EMPLOYER_IDS = [1740, 3529, 78638, 2748, 3776, 41862, 67611, 87021, 2180, 84585]

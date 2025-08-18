@@ -1,7 +1,7 @@
+from config import EMPLOYER_IDS
 from src.DBCreator import DBCreator
 from src.DBManager import DBManager
 from src.HH import HeadHunterAPI
-from config import EMPLOYER_IDS
 
 
 def main():
@@ -21,7 +21,6 @@ def main():
         db_manager.insert_vacancies(vacancies)
 
     print("Данные успешно загружены в базу данных")
-
 
     while True:
         print("\nВыберите действие:")
